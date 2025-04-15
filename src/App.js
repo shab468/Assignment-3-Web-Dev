@@ -18,7 +18,7 @@ class App extends Component {
   constructor() {  // Create and initialize state
     super(); 
     this.state = {
-      accountBalance: 1234567.89,
+      accountBalance: 0,
       creditList: [],
       debitList: [],
       currentUser: {
@@ -28,7 +28,52 @@ class App extends Component {
     };
   }
 
-  // Update state's currentUser (userName) after "Log In" button is clicked
+  // Fetch credits and debits from API when component mounts
+  async componentDidMount() {
+    const creditRes = await fetch("https://johnnylaicode.github.io/api/credits.json");
+    const creditData = await creditRes.json();
+
+    const debitRes = await fetch("https://johnnylaicode.github.io/api/debits.json");
+    const debitData = await debitRes.json();
+
+    const totalCredits = creditData.reduce((sum, item) => sum + item.amount, 0);
+    const totalDebits = debitData.reduce((sum, item) => sum + item.amount, 0);
+    const balance = totalCredits - totalDebits;
+
+    this.setState({
+      creditList: creditData,
+      debitList: debitData,
+      accountBalance: balance
+    });
+  }
+
+  // Add new credit and update balance
+  addCredit = (newCredit) => {
+    const updatedCredits = [...this.state.creditList, newCredit];
+    const totalCredits = updatedCredits.reduce((sum, item) => sum + item.amount, 0);
+    const totalDebits = this.state.debitList.reduce((sum, item) => sum + item.amount, 0);
+    const newBalance = totalCredits - totalDebits;
+
+    this.setState({
+      creditList: updatedCredits,
+      accountBalance: newBalance
+    });
+  }
+
+  // Add new debit and update balance
+  addDebit = (newDebit) => {
+    const updatedDebits = [...this.state.debitList, newDebit];
+    const totalCredits = this.state.creditList.reduce((sum, item) => sum + item.amount, 0);
+    const totalDebits = updatedDebits.reduce((sum, item) => sum + item.amount, 0);
+    const newBalance = totalCredits - totalDebits;
+
+    this.setState({
+      debitList: updatedDebits,
+      accountBalance: newBalance
+    });
+  }
+
+  // Update current user on login
   mockLogIn = (logInInfo) => {  
     const newUser = {...this.state.currentUser};
     newUser.userName = logInInfo.userName;
@@ -43,8 +88,20 @@ class App extends Component {
       <UserProfile userName={this.state.currentUser.userName} memberSince={this.state.currentUser.memberSince} />
     )
     const LogInComponent = () => (<LogIn user={this.state.currentUser} mockLogIn={this.mockLogIn} />)
-    const CreditsComponent = () => (<Credits credits={this.state.creditList} />) 
-    const DebitsComponent = () => (<Debits debits={this.state.debitList} />) 
+    const CreditsComponent = () => (
+      <Credits
+        credits={this.state.creditList}
+        addCredit={this.addCredit}
+        accountBalance={this.state.accountBalance}
+      />
+    )
+    const DebitsComponent = () => (
+      <Debits
+        debits={this.state.debitList}
+        addDebit={this.addDebit}
+        accountBalance={this.state.accountBalance}
+      />
+    )
 
     // Important: Include the "basename" in Router, which is needed for deploying the React app to GitHub Pages
     return (
