@@ -4,6 +4,7 @@ src/App.js
 This is the top-level component of the app.
 It contains the top-level state.
 ==================================================*/
+import Navigation from './components/Navigation'; 
 import React, {Component} from 'react';
 import {BrowserRouter as Router, Route} from 'react-router-dom';
 
@@ -106,7 +107,8 @@ class App extends Component {
     // Important: Include the "basename" in Router, which is needed for deploying the React app to GitHub Pages
     return (
       <Router basename="/bank-of-react-starter-code">
-        <div>
+        <div style={{ backgroundColor: '#FFFACD', minHeight: '100vh' }}>
+          <Navigation />
           <Route exact path="/" render={HomeComponent}/>
           <Route exact path="/userProfile" render={UserProfileComponent}/>
           <Route exact path="/login" render={LogInComponent}/>
