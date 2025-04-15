@@ -29,7 +29,7 @@ class App extends Component {
     };
   }
 
-  // Fetch credits and debits from API when component mounts
+  //get credits and debits from API when component mounts
   async componentDidMount() {
     const creditRes = await fetch("https://johnnylaicode.github.io/api/credits.json");
     const creditData = await creditRes.json();
