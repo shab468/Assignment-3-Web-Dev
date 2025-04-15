@@ -4,33 +4,95 @@ src/components/Debits.js
 The Debits component contains information for Debits page view.
 Note: You need to work on this file for the Assignment.
 ==================================================*/
-import {Link} from 'react-router-dom';
+
+import { useState } from 'react';
+import AccountBalance from './AccountBalance';
 
 const Debits = (props) => {
-  // Create the list of Debit items
-  let debitsView = () => {
+  const [description, setDescription] = useState('');
+  const [amount, setAmount] = useState('');
+
+  // Render the list of Debit items
+  const debitsView = () => {
     const { debits } = props;
-    return debits.map((debit) => {  // Extract "id", "amount", "description" and "date" properties of each debits JSON array element
-      let date = debit.date.slice(0,10);
-      return <li key={debit.id}>{debit.amount} {debit.description} {date}</li>
+    return debits.map((debit, index) => {
+      const date = debit.date.slice(0, 10);
+      return (
+        <li key={debit.date + debit.description + debit.amount}>
+          <strong>{debit.description}</strong> - ${debit.amount.toFixed(2)} on {date}
+        </li>
+      );
     });
-  }
-  // Render the list of Debit items and a form to input new Debit item
+  };
+
+  // Handle form submission to add a new debit
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const newDebit = {
+      description: description,
+      amount: parseFloat(parseFloat(amount).toFixed(2)),
+      date: new Date().toISOString()
+    };
+
+    props.addDebit(newDebit); // call parent's method
+    setDescription('');
+    setAmount('');
+  };
+
   return (
-    <div>
+    <div style={{ padding: '20px' }}>
       <h1>Debits</h1>
-
-      {debitsView()}
-
-      <form onSubmit={props.addDebit}>
-        <input type="text" name="description" />
-        <input type="number" name="amount" />
-        <button type="submit">Add Debit</button>
-      </form>
-      <br/>
-      <Link to="/">Return to Home</Link>
+  
+      {/* Flex container to center form and list */}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+          gap: '60px',
+          marginTop: '20px'
+        }}
+      >
+        {/* Left: Debit Form */}
+        <form onSubmit={handleSubmit} style={{ maxWidth: '300px' }}>
+          <div>
+            <label>Description: </label>
+            <input
+              type="text"
+              name="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              required
+              style={{ width: '100%', marginBottom: '10px' }}
+            />
+          </div>
+          <div>
+            <label>Amount: </label>
+            <input
+              type="number"
+              name="amount"
+              step="0.01"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              required
+              style={{ width: '100%', marginBottom: '10px' }}
+            />
+          </div>
+          <button type="submit" style={{ width: '100%' }}>Add Debit</button>
+        </form>
+  
+        {/* Right: Debit List */}
+        <div>
+          <h3>All Debits:</h3>
+          <ul>{debitsView()}</ul>
+        </div>
+      </div>
+  
+      <br />
+      <AccountBalance accountBalance={props.accountBalance} />
     </div>
   );
-}
+};
 
 export default Debits;
